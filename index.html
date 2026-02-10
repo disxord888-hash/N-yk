@@ -326,6 +326,65 @@
             margin-top: 4px;
         }
 
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
         /* Custom Scrollbar */
         .log-list::-webkit-scrollbar {
             width: 6px;
@@ -356,8 +415,16 @@
                     <span class="exponent-label">Format Size (Exponent N)</span>
                     <span id="exponent-display" class="exponent-value">20</span>
                 </div>
-                <input type="range" id="exponent-range" class="exponent-slider" min="8" max="35" value="20">
+                <input type="range" id="exponent-range" class="exponent-slider" min="6" max="43" value="20">
                 <div id="size-display" class="size-info">Limit: 1,048,576 bytes (1 MB)</div>
+
+                <div class="toggle-container">
+                    <span class="toggle-label">Half-Size Mode (hyk / x1.5)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="half-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
 
             <div id="drop-zone" class="drop-zone">
@@ -376,13 +443,22 @@
                     <!-- Logs will appear here -->
                 </div>
 
-                <button id="download-btn" class="btn btn-primary" disabled>
-                    Download .20yk
-                </button>
+                <div id="specs-links"
+                    style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                    <button id="download-btn" class="btn btn-primary" disabled style="margin-top: 0;">
+                        Download .20yk
+                    </button>
+                    <a href="extractor.html" class="btn btn-secondary" style="margin-top: 0; width: 100%;">
+                        Got a .yk file? Go to Extractor
+                    </a>
+                </div>
             </div>
         </main>
 
-        <a href="20yk_specification.md" class="specs-link" target="_blank">View .20yk Specification →</a>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <a href="20yk_specification.md" class="specs-link" target="_blank">View .yk Specs →</a>
+            <a href="hyk_specification.md" class="specs-link" target="_blank">View .hyk Specs →</a>
+        </div>
     </div>
 
     <script>
@@ -394,30 +470,37 @@
         const logList = document.getElementById('log-list');
         const exponentRange = document.getElementById('exponent-range');
         const exponentDisplay = document.getElementById('exponent-display');
+        const halfToggle = document.getElementById('half-toggle');
         const sizeDisplay = document.getElementById('size-display');
         const mainTitle = document.getElementById('main-title');
+        const downloadBtn = document.getElementById('download-btn');
 
         let currentFile = null;
         let currentExponent = 20;
+        let isHalf = false;
         let SIZE_LIMIT = Math.pow(2, 20);
 
         // UI Updates for Exponent
         const updateExponentUI = () => {
             currentExponent = parseInt(exponentRange.value);
-            exponentDisplay.textContent = currentExponent;
-            mainTitle.textContent = `.${currentExponent}yk`;
-            downloadBtn.textContent = `Download .${currentExponent}yk`;
+            isHalf = halfToggle.checked;
 
-            SIZE_LIMIT = Math.pow(2, currentExponent);
+            const formatName = `${currentExponent}${isHalf ? 'h' : ''}yk`;
+
+            exponentDisplay.textContent = currentExponent;
+            mainTitle.textContent = `.${formatName}`;
+            downloadBtn.textContent = `Download .${formatName}`;
+
+            SIZE_LIMIT = Math.pow(2, currentExponent) * (isHalf ? 1.5 : 1);
 
             // Format size for display
-            let sizeStr = SIZE_LIMIT.toLocaleString() + " bytes";
-            if (currentExponent >= 30) {
-                sizeStr += ` (${(SIZE_LIMIT / 1024 / 1024 / 1024).toFixed(0)} GB)`;
-            } else if (currentExponent >= 20) {
-                sizeStr += ` (${(SIZE_LIMIT / 1024 / 1024).toFixed(0)} MB)`;
-            } else if (currentExponent >= 10) {
-                sizeStr += ` (${(SIZE_LIMIT / 1024).toFixed(0)} KB)`;
+            let sizeStr = Math.floor(SIZE_LIMIT).toLocaleString() + " bytes";
+            if (SIZE_LIMIT >= 1024 * 1024 * 1024) {
+                sizeStr += ` (${(SIZE_LIMIT / 1024 / 1024 / 1024).toFixed(1)} GB)`;
+            } else if (SIZE_LIMIT >= 1024 * 1024) {
+                sizeStr += ` (${(SIZE_LIMIT / 1024 / 1024).toFixed(1)} MB)`;
+            } else if (SIZE_LIMIT >= 1024) {
+                sizeStr += ` (${(SIZE_LIMIT / 1024).toFixed(1)} KB)`;
             }
             sizeDisplay.textContent = `Limit: ${sizeStr}`;
 
@@ -428,6 +511,7 @@
         };
 
         exponentRange.oninput = updateExponentUI;
+        halfToggle.onchange = updateExponentUI;
 
         // UI Helpers
         const addLog = (message, type = 'info') => {
@@ -509,16 +593,19 @@
                 }
 
                 if (isValid) {
+                    const formatName = `${currentExponent}${isHalf ? 'h' : ''}yk`;
                     updateStatus('SPECIFICATION COMPLIANT', 'success');
-                    addLog(`All files are within 2^${currentExponent} bytes limit.`, 'success');
+                    addLog(`All files are within ${formatName} limit.`, 'success');
                     downloadBtn.disabled = false;
                 } else {
-                    updateStatus(`ERR_${currentExponent}YK_CORRUPTED`, 'error');
-                    addLog(`Error: Single file size exceeds 2^${currentExponent} bytes limit.`, 'error');
+                    const errorSuffix = `${currentExponent}${isHalf ? 'H' : ''}YK_CORRUPTED`;
+                    updateStatus(`ERR_${errorSuffix}`, 'error');
+                    addLog(`Error: Single file size exceeds 2^${currentExponent}${isHalf ? ' x 1.5' : ''} bytes limit.`, 'error');
                 }
 
             } catch (err) {
-                updateStatus(`ERR_${currentExponent}YK_INVALID_ZIP`, 'error');
+                const errorSuffix = `${currentExponent}${isHalf ? 'H' : ''}YK_INVALID_ZIP`;
+                updateStatus(`ERR_${errorSuffix}`, 'error');
                 addLog('Error: Failed to parse ZIP file.', 'error');
                 console.error(err);
             }
@@ -526,8 +613,9 @@
 
         downloadBtn.onclick = () => {
             if (!currentFile) return;
-            const newName = currentFile.name.replace(/\.zip$/i, '') + `.${currentExponent}yk`;
-            const blob = new Blob([currentFile], { type: `application/x-${currentExponent}yk+zip` });
+            const formatName = `${currentExponent}${isHalf ? 'h' : ''}yk`;
+            const newName = currentFile.name.replace(/\.zip$/i, '') + `.${formatName}`;
+            const blob = new Blob([currentFile], { type: `application/x-${formatName}+zip` });
 
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);

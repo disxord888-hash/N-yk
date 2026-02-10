@@ -1,149 +1,30 @@
-# yk サイズ命名規則 仕様書（拡張版）
+# .20yk Converter
 
-## 1. 概要
+A lightweight, browser-based utility to package your files into the **.20yk** format.
 
-`yk` は **バイトサイズを 2 の累乗指数で直接表す命名体系**である。
+## Overview
 
-* 表記形式：`Nyk`
-* 意味：`2^N bytes`
-* SI単位（kB, MB）や IEC 単位（KiB, MiB）とは異なり、**指数そのものを名前に使う**
-* 主用途：
+`.20yk` is a strict, lightweight compression format built on top of the standard ZIP structure. It follows the **yk size convention** ($Nyk = 2^N$ bytes), where `.20yk` corresponds to a hard limit of **2²⁰ bytes (1MB)** per internal file.
 
-  * ファイル形式の拡張子
-  * サイズ制限フォーマット
-  * 技術仕様・設計上の明示的制約
+This tool allows you to:
+- Convert standard ZIP files to `.20yk` format.
+- Validate that all internal files adhere to the 1MB (2²⁰B) size limit.
+- Ensure format compliance automatically.
 
----
+## Features
 
-## 2. 命名思想
+- **Client-Side Processing**: No data is uploaded to any server. Everything happens in your browser using [JSZip](https://stuk.github.io/jszip/).
+- **Instant Validation**: Quickly checks if your ZIP file meets the `.20yk` specifications.
+- **Modern UI**: A sleek, reactive interface with dark mode and glassmorphism.
 
-* サイズの意味が拡張子だけで即座に分かる
-* 人間と機械の双方にとって解釈が一意
-* 数学的・連続的・拡張可能
-* 「サイズは名前に書いてある。破ったら壊れる」という思想を前提とする
+## Usage
 
----
+1. Open `index.html` in your web browser.
+2. Drag and drop a regular ZIP file into the drop zone.
+3. The tool will scan internal files for compliance.
+4. If valid, click **Download .20yk** to save your packaged file.
 
-## 3. 基本定義
+## Specification
 
-```text
-Nyk = 2^N bytes
-```
+The full technical specification for the **yk size naming convention** and the `.20yk` format can be found in [20yk_specification.md](./20yk_specification.md).
 
-* `N` は整数
-* 基数は常に 2
-* 小数・別基数は認めない
-
----
-
-## 4. 極小容量帯（.8yk 〜 .15yk）
-
-| yk   | バイト数   | 一般表記  |
-| ---- | ------ | ----- |
-| 8yk  | 2^8 B  | 256 B |
-| 9yk  | 2^9 B  | 512 B |
-| 10yk | 2^10 B | 1 KB  |
-| 11yk | 2^11 B | 2 KB  |
-| 12yk | 2^12 B | 4 KB  |
-| 13yk | 2^13 B | 8 KB  |
-| 14yk | 2^14 B | 16 KB |
-| 15yk | 2^15 B | 32 KB |
-
----
-
-## 5. 小〜中容量帯（.16yk 〜 .19yk）
-
-| yk   | バイト数   | 一般表記   |
-| ---- | ------ | ------ |
-| 16yk | 2^16 B | 64 KB  |
-| 17yk | 2^17 B | 128 KB |
-| 18yk | 2^18 B | 256 KB |
-| 19yk | 2^19 B | 512 KB |
-
----
-
-## 6. 基準容量帯（.20yk）
-
-| yk       | バイト数       | 一般表記     |
-| -------- | ---------- | -------- |
-| **20yk** | **2^20 B** | **1 MB** |
-
-※ 多くの仕様・制限フォーマットにおける基準点として推奨される
-
----
-
-## 7. 中容量帯（.21yk 〜 .29yk）
-
-| yk   | バイト数   | 一般表記   |
-| ---- | ------ | ------ |
-| 21yk | 2^21 B | 2 MB   |
-| 22yk | 2^22 B | 4 MB   |
-| 23yk | 2^23 B | 8 MB   |
-| 24yk | 2^24 B | 16 MB  |
-| 25yk | 2^25 B | 32 MB  |
-| 26yk | 2^26 B | 64 MB  |
-| 27yk | 2^27 B | 128 MB |
-| 28yk | 2^28 B | 256 MB |
-| 29yk | 2^29 B | 512 MB |
-
----
-
-## 8. 大容量帯（.30yk 〜 .34yk）
-
-| yk   | バイト数   | 一般表記  |
-| ---- | ------ | ----- |
-| 30yk | 2^30 B | 1 GB  |
-| 31yk | 2^31 B | 2 GB  |
-| 32yk | 2^32 B | 4 GB  |
-| 33yk | 2^33 B | 8 GB  |
-| 34yk | 2^34 B | 16 GB |
-
----
-
-## 9. 超大容量帯（.35yk 〜 .39yk）
-
-| yk   | バイト数   | 一般表記   |
-| ---- | ------ | ------ |
-| 35yk | 2^35 B | 32 GB  |
-| 36yk | 2^36 B | 64 GB  |
-| 37yk | 2^37 B | 128 GB |
-| 38yk | 2^38 B | 256 GB |
-| 39yk | 2^39 B | 512 GB |
-
----
-
-## 10. 拡張子としての使用ルール
-
-* `.Nyk` は **最大許容サイズが 2^N バイトであることを示す**
-* 制限対象は以下のいずれか、または複合で定義できる：
-
-  * 単一ファイル最大サイズ
-  * 展開後の総サイズ
-  * ストリーム単位の最大サイズ
-
-※ 具体的な制限内容は、各 `.Nyk` フォーマット仕様書で必ず明示すること
-
----
-
-## 11. 非対象事項
-
-* 10進基数（1000）による換算
-* 小数指数（例：20.5yk）
-* SI/IEC 単位との互換保証
-
----
-
-## 12. 総括
-
-> **yk は単位ではない。指数である。**
-
-拡張子・仕様名・制限値を一体化することで、
-曖昧さのないサイズ表現を実現する命名体系である。
-
----
-
-## 13. バージョン情報
-
-* 仕様名：yk Size Naming Specification
-* バージョン：1.0
-* 状態：Stable
