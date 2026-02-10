@@ -240,34 +240,54 @@
             transform: translateX(20px);
         }
 
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .drop-zone {
             border: 2px dashed rgba(99, 102, 241, 0.3);
             border-radius: 16px;
-            padding: 40px 20px;
+            padding: 30px 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             background: rgba(15, 23, 42, 0.3);
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .drop-zone:hover,
         .drop-zone.drag-over {
             border-color: var(--primary);
             background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-2px);
         }
 
         .drop-zone-text {
-            font-weight: 500;
-            display: block;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
         }
 
         .drop-zone-subtext {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
         }
 
-        #file-input {
+        #zip-input,
+        #folder-input {
             display: none;
         }
 
@@ -394,10 +414,17 @@
                 </div>
             </div>
 
-            <div id="drop-zone" class="drop-zone">
-                <span class="drop-zone-text">Drop ZIP or Folder here</span>
-                <span class="drop-zone-subtext">or click to browse</span>
-                <input type="file" id="file-input" webkitdirectory directory multiple>
+            <div class="input-grid">
+                <div id="zip-zone" class="drop-zone">
+                    <span class="drop-zone-text">📦 ZIP File</span>
+                    <span class="drop-zone-subtext">Extract & Repackage</span>
+                    <input type="file" id="zip-input" accept=".zip">
+                </div>
+                <div id="folder-zone" class="drop-zone">
+                    <span class="drop-zone-text">📁 Folder</span>
+                    <span class="drop-zone-subtext">Package Directory</span>
+                    <input type="file" id="folder-input" webkitdirectory directory multiple>
+                </div>
             </div>
 
             <a href="extractor.html" class="btn btn-secondary">Got a .yk file? Go to Extractor</a>
@@ -420,8 +447,10 @@
     </div>
 
     <script>
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
+        const zipZone = document.getElementById('zip-zone');
+        const folderZone = document.getElementById('folder-zone');
+        const zipInput = document.getElementById('zip-input');
+        const folderInput = document.getElementById('folder-input');
         const statusContainer = document.getElementById('status-container');
         const statusDot = document.getElementById('status-dot');
         const statusTitle = document.getElementById('status-title');
@@ -456,7 +485,12 @@
 
         exponentRange.oninput = updateExponentUI;
         halfToggle.onchange = updateExponentUI;
-        clearBtn.onclick = () => { statusContainer.style.display = 'none'; currentZipContent = null; fileInput.value = ''; };
+        clearBtn.onclick = () => {
+            statusContainer.style.display = 'none';
+            currentZipContent = null;
+            zipInput.value = '';
+            folderInput.value = '';
+        };
 
         const addLog = (msg, type = 'info') => {
             const div = document.createElement('div');
@@ -471,58 +505,109 @@
             statusDot.style.backgroundColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--primary)';
         };
 
-        dropZone.onclick = () => fileInput.click();
+        // Zone Click Handlers
+        zipZone.onclick = () => zipInput.click();
+        folderZone.onclick = () => folderInput.click();
 
-        // Handle standard input (including folders)
-        fileInput.onchange = (e) => processFiles(Array.from(e.target.files));
-
-        // Drag and Drop supporting folders
-        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); };
-        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
-        dropZone.ondrop = async (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const items = Array.from(e.dataTransfer.items).map(i => i.webkitGetAsEntry());
-            const files = [];
-
-            const scan = async (entry, path = "") => {
-                if (entry.isFile) {
-                    const file = await new Promise(r => entry.file(r));
-                    Object.defineProperty(file, 'fullPath', { value: path + entry.name });
-                    files.push(file);
-                } else if (entry.isDirectory) {
-                    const reader = entry.createReader();
-                    const entries = await new Promise(r => reader.readEntries(r));
-                    for (const e of entries) await scan(e, path + entry.name + "/");
-                }
-            };
-
-            for (const item of items) if (item) await scan(item);
-            processFiles(files);
+        // Input Change Handlers
+        zipInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (file) await processZipFile(file);
         };
+        folderInput.onchange = (e) => processFiles(Array.from(e.target.files));
+
+        // Drag and Drop Logic
+        const setupDragDrop = (zone, onFiles) => {
+            zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('drag-over'); };
+            zone.ondragleave = () => zone.classList.remove('drag-over');
+            zone.ondrop = async (e) => {
+                e.preventDefault();
+                zone.classList.remove('drag-over');
+                const items = Array.from(e.dataTransfer.items).map(i => i.webkitGetAsEntry());
+                const files = [];
+                const scan = async (entry, path = "") => {
+                    if (entry.isFile) {
+                        const file = await new Promise(r => entry.file(r));
+                        Object.defineProperty(file, 'fullPath', { value: path + entry.name });
+                        files.push(file);
+                    } else if (entry.isDirectory) {
+                        const reader = entry.createReader();
+                        const entries = await new Promise(r => reader.readEntries(r));
+                        for (const e of entries) await scan(e, path + entry.name + "/");
+                    }
+                };
+                for (const item of items) if (item) await scan(item);
+                onFiles(files);
+            };
+        };
+
+        setupDragDrop(zipZone, async (files) => {
+            const zipFile = files.find(f => f.name.toLowerCase().endsWith('.zip'));
+            if (zipFile) await processZipFile(zipFile);
+            else addLog("Please drop a ZIP file here", "error");
+        });
+
+        setupDragDrop(folderZone, processFiles);
+
+        async function processZipFile(blob) {
+            statusContainer.style.display = 'block';
+            logList.innerHTML = '';
+            downloadBtn.disabled = true;
+            updateStatus('EXTRACTING ZIP...', 'processing');
+            addLog(`Reading ${blob.name}...`);
+
+            try {
+                const zip = await JSZip.loadAsync(blob);
+                const fileEntries = [];
+                zip.forEach((path, entry) => {
+                    if (!entry.dir) fileEntries.push({ path, entry });
+                });
+
+                const filesToProcess = [];
+                for (const { path, entry } of fileEntries) {
+                    const content = await entry.async('arraybuffer');
+                    filesToProcess.push({
+                        name: path,
+                        content: content
+                    });
+                }
+                await processFileData(filesToProcess);
+            } catch (err) {
+                addLog(`Error reading ZIP: ${err.message}`, 'error');
+                updateStatus('ERROR', 'error');
+            }
+        }
 
         async function processFiles(files) {
             if (!files.length) return;
             statusContainer.style.display = 'block';
             logList.innerHTML = '';
             downloadBtn.disabled = true;
-            updateStatus('PROCESSING...', 'processing');
+            updateStatus('PREPARING...', 'processing');
 
-            const zip = new JSZip();
-            let isValid = true;
-
+            const filesToProcess = [];
             for (const file of files) {
                 const path = file.fullPath || file.webkitRelativePath || file.name;
                 const content = await file.arrayBuffer();
-                const size = content.byteLength;
+                filesToProcess.push({ name: path, content });
+            }
+            await processFileData(filesToProcess);
+        }
 
+        async function processFileData(filesToProcess) {
+            updateStatus('VALIDATING...', 'processing');
+            const zip = new JSZip();
+            let isValid = true;
+
+            for (const file of filesToProcess) {
+                const size = file.content.byteLength;
                 if (size > SIZE_LIMIT) {
                     isValid = false;
-                    addLog(`✖ ${path}: OVER LIMIT`, 'error');
+                    addLog(`✖ ${file.name}: OVER LIMIT (${size.toLocaleString()} bytes)`, 'error');
                 } else {
-                    addLog(`✔ ${path}: OK`, 'success');
+                    addLog(`✔ ${file.name}: OK`, 'success');
                 }
-                zip.file(path, content);
+                zip.file(file.name, file.content);
             }
 
             currentZipContent = await zip.generateAsync({ type: 'blob' });
@@ -531,6 +616,7 @@
                 downloadBtn.disabled = false;
             } else {
                 updateStatus('VIOLATION', 'error');
+                addLog('Total violation: Please reduce file sizes to meet the convention.', 'error');
             }
         }
 
