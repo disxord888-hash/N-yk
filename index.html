@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.11yk Converter | Strict Lightweight Compression Format</title>
+    <meta name="description"
+        content="A browser-side utility to package and validate files in the .11yk format, enforcing a 1024KB limit per file for lightweight data distribution.">
+    <meta property="og:title" content=".11yk Converter">
+    <meta property="og:description"
+        content="Package your files into the strict lightweight .11yk format instantly in your browser.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+JP:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.5);
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border: rgba(148, 163, 184, 0.1);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+            --white: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 40%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            z-index: 10;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(15, 23, 42, 0.3);
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+        }
+
+        .drop-zone-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .drop-zone:hover .drop-zone-icon {
+            transform: scale(1.1);
+        }
+
+        .drop-zone-text {
+            font-weight: 500;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .drop-zone-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .status-container {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .log-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-entry.error {
+            color: var(--error);
+        }
+
+        .log-entry.success {
+            color: var(--success);
+        }
+
+        .log-entry.info {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            color: white;
+            box-shadow: 0 10px 20px -5px var(--primary-glow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px var(--primary-glow);
+        }
+
+        .btn-primary:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .specs-link {
+            display: block;
+            text-align: center;
+            margin-top: 32px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .specs-link:hover {
+            color: var(--primary);
+        }
+
+        /* Custom Scrollbar */
+        .log-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .log-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .log-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <header class="header">
+            <h1>.11yk</h1>
+            <p>Strict Lightweight Compression Format</p>
+        </header>
+
+        <main class="main-card">
+            <div id="drop-zone" class="drop-zone">
+                <span class="drop-zone-icon">📦</span>
+                <span class="drop-zone-text">Drop ZIP file here</span>
+                <span class="drop-zone-subtext">or click to browse</span>
+                <input type="file" id="file-input" accept=".zip">
+            </div>
+
+            <div id="status-container" class="status-container">
+                <div class="status-header">
+                    <div id="status-dot" class="status-dot"></div>
+                    <div id="status-title" class="status-title">VALIDATING...</div>
+                </div>
+                <div id="log-list" class="log-list">
+                    <!-- Logs will appear here -->
+                </div>
+
+                <button id="download-btn" class="btn btn-primary" disabled>
+                    Download .11yk
+                </button>
+            </div>
+        </main>
+
+        <a href="11yk_specification.md" class="specs-link" target="_blank">View .11yk Specification →</a>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const statusContainer = document.getElementById('status-container');
+        const statusDot = document.getElementById('status-dot');
+        const statusTitle = document.getElementById('status-title');
+        const logList = document.getElementById('log-list');
+        const downloadBtn = document.getElementById('download-btn');
+
+        let currentFile = null;
+        const SIZE_LIMIT = 1024 * 1024; // 1024KB
+
+        // UI Helpers
+        const addLog = (message, type = 'info') => {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const msgSpan = document.createElement('span');
+            msgSpan.textContent = message;
+            entry.appendChild(msgSpan);
+            logList.appendChild(entry);
+            logList.scrollTop = logList.scrollHeight;
+        };
+
+        const updateStatus = (title, type) => {
+            statusTitle.textContent = title;
+            statusDot.style.backgroundColor =
+                type === 'success' ? 'var(--success)' :
+                    type === 'error' ? 'var(--error)' : 'var(--primary)';
+        };
+
+        // Event Listeners
+        dropZone.onclick = () => fileInput.click();
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        };
+
+        dropZone.ondragleave = () => {
+            dropZone.classList.remove('drag-over');
+        };
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length) {
+                processFile(e.dataTransfer.files[0]);
+            }
+        };
+
+        fileInput.onchange = (e) => {
+            if (e.target.files.length) {
+                processFile(e.target.files[0]);
+            }
+        };
+
+        async function processFile(file) {
+            if (!file.name.endsWith('.zip')) {
+                alert('Please upload a .zip file.');
+                return;
+            }
+
+            currentFile = file;
+            statusContainer.style.display = 'block';
+            logList.innerHTML = '';
+            downloadBtn.disabled = true;
+            updateStatus('VALIDATING...', 'processing');
+            addLog(`Reading ${file.name}...`, 'info');
+
+            try {
+                const zip = await JSZip.loadAsync(file);
+                let isValid = true;
+                const files = Object.keys(zip.files);
+
+                addLog(`Found ${files.length} entries in ZIP.`);
+
+                for (const filename of files) {
+                    const entry = zip.files[filename];
+                    if (entry.dir) continue;
+
+                    const size = entry._data.uncompressedSize;
+                    const sizeKB = (size / 1024).toFixed(2);
+
+                    if (size > SIZE_LIMIT) {
+                        addLog(`✖ ${filename}: ${sizeKB}KB (EXCEEDS LIMIT)`, 'error');
+                        isValid = false;
+                    } else {
+                        addLog(`✔ ${filename}: ${sizeKB}KB`, 'success');
+                    }
+                }
+
+                if (isValid) {
+                    updateStatus('SPECIFICATION COMPLIANT', 'success');
+                    addLog('All files are within 1024KB limit.', 'success');
+                    downloadBtn.disabled = false;
+                } else {
+                    updateStatus('ERR_11YK_CORRUPTED', 'error');
+                    addLog('Error: Single file size exceeds 1024KB limit.', 'error');
+                }
+
+            } catch (err) {
+                updateStatus('ERR_11YK_INVALID_ZIP', 'error');
+                addLog('Error: Failed to parse ZIP file.', 'error');
+                console.error(err);
+            }
+        }
+
+        downloadBtn.onclick = () => {
+            if (!currentFile) return;
+            const newName = currentFile.name.replace(/\.zip$/i, '') + '.11yk';
+            const blob = new Blob([currentFile], { type: 'application/x-11yk+zip' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = newName;
+            link.click();
+
+            addLog(`Downloaded: ${newName}`, 'success');
+        };
+    </script>
+</body>
+
+</html>
