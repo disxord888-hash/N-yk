@@ -61,8 +61,7 @@
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            animation: fadeInDown 0.8s ease-out;
+            margin-bottom: 20px;
         }
 
         .header h1 {
@@ -82,187 +81,52 @@
             font-weight: 300;
         }
 
+        .permanent-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: rgba(30, 41, 59, 0.5);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .permanent-link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .permanent-link-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .permanent-link-url {
+            color: var(--primary);
+            text-decoration: none;
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .permanent-link-url:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
         .main-card {
             background: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--border);
             border-radius: 24px;
-            padding: 40px;
+            padding: 30px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-        }
-
-        .drop-zone {
-            border: 2px dashed rgba(99, 102, 241, 0.3);
-            border-radius: 16px;
-            padding: 60px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(15, 23, 42, 0.3);
-            margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .drop-zone:hover,
-        .drop-zone.drag-over {
-            border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px var(--primary-glow);
-        }
-
-        .drop-zone-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-
-        .drop-zone:hover .drop-zone-icon {
-            transform: scale(1.1);
-        }
-
-        .drop-zone-text {
-            font-weight: 500;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .drop-zone-subtext {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        #file-input {
-            display: none;
-        }
-
-        .status-container {
-            margin-top: 24px;
-            display: none;
-        }
-
-        .status-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-
-        .status-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .log-list {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 16px;
-            font-family: 'Monaco', 'Consolas', monospace;
-            font-size: 0.8rem;
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .log-entry {
-            margin-bottom: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .log-entry.error {
-            color: var(--error);
-        }
-
-        .log-entry.success {
-            color: var(--success);
-        }
-
-        .log-entry.info {
-            color: var(--text-muted);
-        }
-
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            font-family: inherit;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
-            color: white;
-            box-shadow: 0 10px 20px -5px var(--primary-glow);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 25px -5px var(--primary-glow);
-        }
-
-        .btn-primary:disabled {
-            background: #334155;
-            color: #64748b;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .specs-link {
-            display: block;
-            text-align: center;
-            margin-top: 32px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s ease;
-        }
-
-        .specs-link:hover {
-            color: var(--primary);
         }
 
         .exponent-selector {
@@ -315,10 +179,6 @@
             transition: transform 0.2s;
         }
 
-        .exponent-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
         .size-info {
             font-size: 0.8rem;
             color: var(--text-muted);
@@ -333,11 +193,6 @@
             margin-top: 12px;
             padding-top: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .toggle-label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
         }
 
         .switch {
@@ -385,29 +240,141 @@
             transform: translateX(20px);
         }
 
-        /* Custom Scrollbar */
-        .log-list::-webkit-scrollbar {
-            width: 6px;
+        .drop-zone {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(15, 23, 42, 0.3);
+            margin-bottom: 20px;
         }
 
-        .log-list::-webkit-scrollbar-track {
-            background: transparent;
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
         }
 
-        .log-list::-webkit-scrollbar-thumb {
+        .drop-zone-text {
+            font-weight: 500;
+            display: block;
+        }
+
+        .drop-zone-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .status-container {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .log-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+        }
+
+        .log-entry.error {
+            color: var(--error);
+        }
+
+        .log-entry.success {
+            color: var(--success);
+        }
+
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            color: white;
+        }
+
+        .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
+            color: var(--text);
+            margin-top: 10px;
+        }
+
+        .specs-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .specs-link:hover {
+            color: var(--primary);
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
         <header class="header">
             <h1 id="main-title">.20yk</h1>
             <p>yk Size-Based Compression Format</p>
         </header>
+
+        <div class="permanent-links">
+            <div class="permanent-link-item">
+                <span class="permanent-link-label">圧縮用 (Converter):</span>
+                <a href="https://disxord888-hash.github.io/N-yk/"
+                    class="permanent-link-url">disxord888-hash.github.io/N-yk/</a>
+            </div>
+            <div class="permanent-link-item">
+                <span class="permanent-link-label">解凍用 (Extractor):</span>
+                <a href="https://disxord888-hash.github.io/N-yk/extractor.html"
+                    class="permanent-link-url">disxord888-hash.github.io/N-yk/extractor.html</a>
+            </div>
+        </div>
 
         <main class="main-card">
             <div class="exponent-selector">
@@ -417,9 +384,8 @@
                 </div>
                 <input type="range" id="exponent-range" class="exponent-slider" min="6" max="43" value="20">
                 <div id="size-display" class="size-info">Limit: 1,048,576 bytes (1 MB)</div>
-
                 <div class="toggle-container">
-                    <span class="toggle-label">Half-Size Mode (hyk / x1.5)</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Half-Size Mode (hyk / x1.5)</span>
                     <label class="switch">
                         <input type="checkbox" id="half-toggle">
                         <span class="slider"></span>
@@ -428,36 +394,27 @@
             </div>
 
             <div id="drop-zone" class="drop-zone">
-                <span class="drop-zone-icon">📦</span>
-                <span class="drop-zone-text">Drop ZIP file here</span>
+                <span class="drop-zone-text">Drop ZIP or Folder here</span>
                 <span class="drop-zone-subtext">or click to browse</span>
-                <input type="file" id="file-input" accept=".zip">
+                <input type="file" id="file-input" webkitdirectory directory multiple>
             </div>
+
+            <a href="extractor.html" class="btn btn-secondary">Got a .yk file? Go to Extractor</a>
 
             <div id="status-container" class="status-container">
                 <div class="status-header">
                     <div id="status-dot" class="status-dot"></div>
                     <div id="status-title" class="status-title">VALIDATING...</div>
                 </div>
-                <div id="log-list" class="log-list">
-                    <!-- Logs will appear here -->
-                </div>
-
-                <div id="specs-links"
-                    style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px; align-items: center;">
-                    <button id="download-btn" class="btn btn-primary" disabled style="margin-top: 0;">
-                        Download .20yk
-                    </button>
-                    <a href="extractor.html" class="btn btn-secondary" style="margin-top: 0; width: 100%;">
-                        Got a .yk file? Go to Extractor
-                    </a>
-                </div>
+                <div id="log-list" class="log-list"></div>
+                <button id="download-btn" class="btn btn-primary" disabled style="margin-top: 20px;">Download</button>
+                <button id="clear-btn" class="btn btn-secondary" style="margin-top: 10px;">Clear</button>
             </div>
         </main>
 
-        <div style="display: flex; gap: 20px; justify-content: center;">
-            <a href="20yk_specification.md" class="specs-link" target="_blank">View .yk Specs →</a>
-            <a href="hyk_specification.md" class="specs-link" target="_blank">View .hyk Specs →</a>
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+            <a href="20yk_specification.md" class="specs-link" target="_blank">yk Specs →</a>
+            <a href="hyk_specification.md" class="specs-link" target="_blank">hyk Specs →</a>
         </div>
     </div>
 
@@ -474,156 +431,115 @@
         const sizeDisplay = document.getElementById('size-display');
         const mainTitle = document.getElementById('main-title');
         const downloadBtn = document.getElementById('download-btn');
+        const clearBtn = document.getElementById('clear-btn');
 
-        let currentFile = null;
+        let currentZipContent = null;
         let currentExponent = 20;
         let isHalf = false;
         let SIZE_LIMIT = Math.pow(2, 20);
 
-        // UI Updates for Exponent
         const updateExponentUI = () => {
             currentExponent = parseInt(exponentRange.value);
             isHalf = halfToggle.checked;
-
             const formatName = `${currentExponent}${isHalf ? 'h' : ''}yk`;
-
             exponentDisplay.textContent = currentExponent;
             mainTitle.textContent = `.${formatName}`;
             downloadBtn.textContent = `Download .${formatName}`;
-
             SIZE_LIMIT = Math.pow(2, currentExponent) * (isHalf ? 1.5 : 1);
-
-            // Format size for display
             let sizeStr = Math.floor(SIZE_LIMIT).toLocaleString() + " bytes";
-            if (SIZE_LIMIT >= 1024 * 1024 * 1024) {
-                sizeStr += ` (${(SIZE_LIMIT / 1024 / 1024 / 1024).toFixed(1)} GB)`;
-            } else if (SIZE_LIMIT >= 1024 * 1024) {
-                sizeStr += ` (${(SIZE_LIMIT / 1024 / 1024).toFixed(1)} MB)`;
-            } else if (SIZE_LIMIT >= 1024) {
-                sizeStr += ` (${(SIZE_LIMIT / 1024).toFixed(1)} KB)`;
-            }
+            if (SIZE_LIMIT >= 1024 ** 3) sizeStr += ` (${(SIZE_LIMIT / 1024 ** 3).toFixed(1)} GB)`;
+            else if (SIZE_LIMIT >= 1024 ** 2) sizeStr += ` (${(SIZE_LIMIT / 1024 ** 2).toFixed(1)} MB)`;
+            else if (SIZE_LIMIT >= 1024) sizeStr += ` (${(SIZE_LIMIT / 1024).toFixed(1)} KB)`;
             sizeDisplay.textContent = `Limit: ${sizeStr}`;
-
-            // If a file is already loaded, re-validate
-            if (currentFile) {
-                processFile(currentFile);
-            }
         };
 
         exponentRange.oninput = updateExponentUI;
         halfToggle.onchange = updateExponentUI;
+        clearBtn.onclick = () => { statusContainer.style.display = 'none'; currentZipContent = null; fileInput.value = ''; };
 
-        // UI Helpers
-        const addLog = (message, type = 'info') => {
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${type}`;
-            const msgSpan = document.createElement('span');
-            msgSpan.textContent = message;
-            entry.appendChild(msgSpan);
-            logList.appendChild(entry);
+        const addLog = (msg, type = 'info') => {
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            div.textContent = msg;
+            logList.appendChild(div);
             logList.scrollTop = logList.scrollHeight;
         };
 
         const updateStatus = (title, type) => {
             statusTitle.textContent = title;
-            statusDot.style.backgroundColor =
-                type === 'success' ? 'var(--success)' :
-                    type === 'error' ? 'var(--error)' : 'var(--primary)';
+            statusDot.style.backgroundColor = type === 'success' ? 'var(--success)' : type === 'error' ? 'var(--error)' : 'var(--primary)';
         };
 
-        // Event Listeners
         dropZone.onclick = () => fileInput.click();
 
-        dropZone.ondragover = (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        };
+        // Handle standard input (including folders)
+        fileInput.onchange = (e) => processFiles(Array.from(e.target.files));
 
-        dropZone.ondragleave = () => {
-            dropZone.classList.remove('drag-over');
-        };
-
-        dropZone.ondrop = (e) => {
+        // Drag and Drop supporting folders
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = async (e) => {
             e.preventDefault();
             dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length) {
-                processFile(e.dataTransfer.files[0]);
-            }
+            const items = Array.from(e.dataTransfer.items).map(i => i.webkitGetAsEntry());
+            const files = [];
+
+            const scan = async (entry, path = "") => {
+                if (entry.isFile) {
+                    const file = await new Promise(r => entry.file(r));
+                    Object.defineProperty(file, 'fullPath', { value: path + entry.name });
+                    files.push(file);
+                } else if (entry.isDirectory) {
+                    const reader = entry.createReader();
+                    const entries = await new Promise(r => reader.readEntries(r));
+                    for (const e of entries) await scan(e, path + entry.name + "/");
+                }
+            };
+
+            for (const item of items) if (item) await scan(item);
+            processFiles(files);
         };
 
-        fileInput.onchange = (e) => {
-            if (e.target.files.length) {
-                processFile(e.target.files[0]);
-            }
-        };
-
-        async function processFile(file) {
-            if (!file.name.endsWith('.zip')) {
-                alert('Please upload a .zip file.');
-                return;
-            }
-
-            currentFile = file;
+        async function processFiles(files) {
+            if (!files.length) return;
             statusContainer.style.display = 'block';
             logList.innerHTML = '';
             downloadBtn.disabled = true;
-            updateStatus('VALIDATING...', 'processing');
-            addLog(`Reading ${file.name}...`, 'info');
+            updateStatus('PROCESSING...', 'processing');
 
-            try {
-                const zip = await JSZip.loadAsync(file);
-                let isValid = true;
-                const files = Object.keys(zip.files);
+            const zip = new JSZip();
+            let isValid = true;
 
-                addLog(`Found ${files.length} entries in ZIP.`);
+            for (const file of files) {
+                const path = file.fullPath || file.webkitRelativePath || file.name;
+                const content = await file.arrayBuffer();
+                const size = content.byteLength;
 
-                for (const filename of files) {
-                    const entry = zip.files[filename];
-                    if (entry.dir) continue;
-
-                    const size = entry._data.uncompressedSize;
-                    const sizeKB = (size / 1024).toFixed(2);
-
-                    if (size > SIZE_LIMIT) {
-                        addLog(`✖ ${filename}: ${sizeKB}KB (EXCEEDS LIMIT)`, 'error');
-                        isValid = false;
-                    } else {
-                        addLog(`✔ ${filename}: ${sizeKB}KB`, 'success');
-                    }
-                }
-
-                if (isValid) {
-                    const formatName = `${currentExponent}${isHalf ? 'h' : ''}yk`;
-                    updateStatus('SPECIFICATION COMPLIANT', 'success');
-                    addLog(`All files are within ${formatName} limit.`, 'success');
-                    downloadBtn.disabled = false;
+                if (size > SIZE_LIMIT) {
+                    isValid = false;
+                    addLog(`✖ ${path}: OVER LIMIT`, 'error');
                 } else {
-                    const errorSuffix = `${currentExponent}${isHalf ? 'H' : ''}YK_CORRUPTED`;
-                    updateStatus(`ERR_${errorSuffix}`, 'error');
-                    addLog(`Error: Single file size exceeds 2^${currentExponent}${isHalf ? ' x 1.5' : ''} bytes limit.`, 'error');
+                    addLog(`✔ ${path}: OK`, 'success');
                 }
+                zip.file(path, content);
+            }
 
-            } catch (err) {
-                const errorSuffix = `${currentExponent}${isHalf ? 'H' : ''}YK_INVALID_ZIP`;
-                updateStatus(`ERR_${errorSuffix}`, 'error');
-                addLog('Error: Failed to parse ZIP file.', 'error');
-                console.error(err);
+            currentZipContent = await zip.generateAsync({ type: 'blob' });
+            if (isValid) {
+                updateStatus('READY', 'success');
+                downloadBtn.disabled = false;
+            } else {
+                updateStatus('VIOLATION', 'error');
             }
         }
 
         downloadBtn.onclick = () => {
-            if (!currentFile) return;
-            const formatName = `${currentExponent}${isHalf ? 'h' : ''}yk`;
-            const newName = currentFile.name.replace(/\.zip$/i, '') + `.${formatName}`;
-            const blob = new Blob([currentFile], { type: `application/x-${formatName}+zip` });
-
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = newName;
+            link.href = URL.createObjectURL(currentZipContent);
+            link.download = `archive.${currentExponent}${isHalf ? 'h' : ''}yk`;
             link.click();
-
-            addLog(`Downloaded: ${newName}`, 'success');
         };
+        updateExponentUI();
     </script>
 </body>
 
