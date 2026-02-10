@@ -382,12 +382,13 @@
                     <span class="exponent-label">Format Size (Exponent N)</span>
                     <span id="exponent-display" class="exponent-value">20</span>
                 </div>
-                <input type="range" id="exponent-range" class="exponent-slider" min="6" max="43" value="20">
+                <input type="range" id="exponent-range" class="exponent-slider" min="6" max="43" value="20"
+                    autocomplete="off">
                 <div id="size-display" class="size-info">Limit: 1,048,576 bytes (1 MB)</div>
                 <div class="toggle-container">
                     <span style="font-size: 0.85rem; color: var(--text-muted);">Half-Size Mode (hyk / x1.5)</span>
                     <label class="switch">
-                        <input type="checkbox" id="half-toggle">
+                        <input type="checkbox" id="half-toggle" autocomplete="off">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -539,7 +540,13 @@
             link.download = `archive.${currentExponent}${isHalf ? 'h' : ''}yk`;
             link.click();
         };
-        updateExponentUI();
+
+        // Ensure no state is saved across refreshes
+        window.addEventListener('load', () => {
+            exponentRange.value = 20;
+            halfToggle.checked = false;
+            updateExponentUI();
+        });
     </script>
 </body>
 
